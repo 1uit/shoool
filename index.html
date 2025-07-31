@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>学校性价比转换器</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 1em; max-width: 480px; margin: auto; }
+    label, input, select { display: block; margin-bottom: 1em; width: 100%; }
+    button { padding: 0.5em; width: 100%; background: #28a745; color: white; border: none; font-size: 1em; }
+    .result { margin-top: 1em; font-weight: bold; white-space: pre-line; }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+  <h1>学校性价比转换器</h1>
+
+  <label>学校名称 <input id="schoolName" placeholder="请输入学校名称" /></label>
+  <label>学校类型
+    <select id="schoolType">
+      <option>小学</option>
+      <option>初中</option>
+      <option>高中</option>
+      <option>中职</option>
+      <option>大专</option>
+      <option>大学</option>
+    </select>
+  </label>
+  <label>是否住宿
+    <select id="boarding" onchange="toggleDormitoryInput()">
+      <option value="no">否</option>
+      <option value="yes">是</option>
+    </select>
+  </label>
+  <div id="commuteWrapper">
+    <label>通勤时间（单位：每天或每周）
+      <input id="commute" type="number" step="0.1" placeholder="填写通勤时间" />
+    </label>
+  </div>
+  <div id="dormScoreWrapper" class="hidden">
+    <label>宿舍环境评分（1-10）
+      <input id="dormScore" type="number" min="1" max="10" />
+    </label>
+  </div>
+  <label>学费（元） <input id="fee" type="number" placeholder="学费" /></label>
+  <label>整体评分（1-10） <input id="score" type="number" min="1" max="10" /></label>
+
+  <label>学校领导评价
+    <select id="leadership">
+      <option>善解人意</option>
+      <option>微微严厉</option>
+      <option>一群扫马的</option>
+    </select>
+  </label>
+
+  <label>同学环境评价
+    <select id="students">
+      <option>私交甚好</option>
+      <option>和和睦睦</option>
+      <option>萍水相逢</option>
+      <option>一群傻逼</option>
+    </select>
+  </label>
+
+  <button onclick="calculate()">计算性价比</button>
+
+  <div class="result" id="result"></div>
+
+  <script>
+    function toggleDormitoryInput() {
+      const boarding = document.getElementById('boarding').value;
+      document.getElementById('dormScoreWrapper').classList.toggle('hidden', boarding !== 'yes');
+    }
+
+    function getComment(score) {
+      if (score > 1.2) {
+        const comments = [
+          "这性价比堪比打车进清北。",
+          "性价比爆表，属于花小钱上天堂。",
+          "别说了，求你报名这学校！",
+          "你是学术界的小机灵鬼！"
+        ];
+        return comments[Math.floor(Math.random() * comments.length)];
+      } else if (score > 0.8) {
+        const comments = [
+          "还行，至少不会赔本。",
+          "上不上看缘分，但也不至于踩雷。",
+          "属于“可以凑合”那挂。",
+          "性价比平平无奇，像平行四边形。"
+        ];
+        return comments[Math.floor(Math.random() * comments.length)];
+      } else if (score > 0.5) {
+        const comments = [
+          "你上这学校可能比拼多多买会员还不值。",
+          "建议再看看，别一时冲动。",
+          "你这是“花钱上学还要自己打水铺床”套餐。",
+          "如果梦想是南墙，那你这是在飞扑。"
+        ];
+        return comments[Math.floor(Math.random() * comments.length)];
+      } else if (score > 0.3) {
+        const comments = [
+          "你读这个不如在家养猪。",
+          "在这学校，成长的不是你，是心态。",
+          "退学是种艺术，这学校是作品。",
+          "你选的是学校，还是现实版监狱体验？"
+        ];
+        return comments[Math.floor(Math.random() * comments.length)];
+      } else {
+        const comments = [
+          "猫猫看了都摇头。",
+          "建议你退学去修仙，性价比更高。",
+          "上这所学校和浪费人生几乎等号。",
+          "读它不如读地铁线路图。"
+        ];
+        return comments[Math.floor(Math.random() * comments.length)];
+      }
+    }
+
+    function calculate() {
+      const name = document.getElementById('schoolName').value.trim();
+      const type = document.getElementById('schoolType').value;
+      const boarding = document.getElementById('boarding').value;
+      const commute = parseFloat(document.getElementById('commute').value);
+      const dormScore = parseFloat(document.getElementById('dormScore').value);
+      const fee = parseFloat(document.getElementById('fee').value);
+      const score = parseFloat(document.getElementById('score').value);
+      const leadership = document.getElementById('leadership').value;
+      const students = document.getElementById('students').value;
+
+      if (!name || isNaN(fee) || isNaN(commute) || isNaN(score)) {
+        alert('请完整填写所有必填项');
+        return;
+      }
+
+      let commuteFactor = boarding === 'yes' ? commute / 7 : commute;
+      let base = fee + commuteFactor * 100;
+
+      if (boarding === 'yes' && !isNaN(dormScore)) {
+        base -= dormScore * 20;
+      }
+
+      const value = (score * 10) / base;
+
+      let resultText = `学校类型：${type}
+是否住宿：${boarding === 'yes' ? '是' : '否'}
+领导评价：${leadership}
+同学环境：${students}
+性价比得分：${value.toFixed(2)}`;
+
+      if (name.includes('衢州第二中专')) {
+        resultText += '\n🥚 来乌房山读书和坐牢有什么区别。';
+      }
+
+      resultText += `\n\n点评：${getComment(value)}`;
+      document.getElementById('result').innerText = resultText;
+    }
+  </script>
+</body>
+</html>
